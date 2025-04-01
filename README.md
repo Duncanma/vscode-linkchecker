@@ -1,1 +1,1 @@
-# vscode-linkchecker
+# Link Checker
