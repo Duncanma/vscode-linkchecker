@@ -3,6 +3,11 @@
   "displayName": "LinkChecker",
   "publisher": "DuncanMackenzie",
   "description": "Checks external links in the current markdown file and adds any broken links to the problems tab.",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#C80000",
+    "theme": "dark"
+  },
   "homepage": "https://github.com/Duncanma/vscode-linkchecker/blob/main/README.md",
   "bugs": {
     "url": "https://github.com/Duncanma/vscode-linkchecker/issues"
@@ -13,7 +18,7 @@
   },
   "license": "MIT",
   "preview": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.98.0"
   },
