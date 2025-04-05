@@ -136,9 +136,9 @@ export async function updateDiags(
     const diagnostic = new vscode.Diagnostic(
       new vscode.Range(
         lineNumber,
-        urlStart + 1,
+        urlStart,
         lineNumber,
-        urlStart + url.length + 1
+        urlStart + url.length
       ),
       message,
       vscode.DiagnosticSeverity.Warning
