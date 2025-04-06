@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 let linkCheckerStatus: vscode.StatusBarItem;
+const results: { uri:vscode.Uri; url: string; valid: boolean; status: string }[] = [];
 
 const documents: Map<vscode.Uri, number> = new Map();
 export async function updateDiags(
@@ -32,7 +33,6 @@ export async function updateDiags(
   diagnosticCollection.delete(document.uri);
   let diagnostics: vscode.Diagnostic[] = [];
   // Create a new array to store the results
-  const results: { url: string; valid: boolean; status: string }[] = [];
 
   for (let lineNumber = 0; lineNumber < document.lineCount; lineNumber++) {
     const line = document.lineAt(lineNumber);
@@ -78,7 +78,7 @@ export async function updateDiags(
       } catch (error) {
         const status = `Bad link format (${url})`;
         const valid = false;
-        results.push({ url, valid, status });
+        results.push({uri:document.uri, url, valid, status });
         addDiagnostic(lineNumber, urlStart, url, status);
         continue;
       }
@@ -87,7 +87,7 @@ export async function updateDiags(
       if (!url.startsWith("http") && !url.startsWith("//")) {
         const status = `Bad link format (${url})`;
         const valid = false;
-        results.push({ url, valid, status });
+        results.push({uri:document.uri, url, valid, status });
         addDiagnostic(lineNumber, urlStart, url, status);
         continue;
       }
@@ -98,21 +98,22 @@ export async function updateDiags(
         if (!response.ok) {
           const status = `Bad Response: ${response.statusText}::${response.status} (${url})`;
           const valid = false;
-          results.push({ url, valid, status });
+          results.push({uri:document.uri, url, valid, status });
           addDiagnostic(lineNumber, urlStart, url, status);
           continue;
         }
         console.log(`Valid: ${url} ${response.status}`);
         results.push({
+          uri:document.uri,
           url,
           valid: true,
           status: `valid: ${response.statusText}`,
         });
       } catch (error) {
         //add error to results
-        const status = `Error checking link: ${error}`;
+        const status = `Error checking link: ${url} : ${error}`;
         const valid = false;
-        results.push({ url, valid, status });
+        results.push({uri:document.uri, url, valid, status });
         addDiagnostic(lineNumber, urlStart, url, status);
       }
     }
@@ -189,9 +190,9 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  const command = "linkchecker.recheckLinks";
-
-  const commandHandler = () => {
+  const recheckLinksCommand = "linkchecker.recheckLinks";
+//resetLinkChecks
+  const recheckLinksHandler = () => {
     if (
       vscode.window.activeTextEditor &&
       vscode.window.activeTextEditor.document.languageId === "markdown"
@@ -201,8 +202,29 @@ export function activate(context: vscode.ExtensionContext) {
   };
 
   context.subscriptions.push(
-    vscode.commands.registerCommand(command, commandHandler)
+    vscode.commands.registerCommand(recheckLinksCommand, recheckLinksHandler)
   );
+
+  const resetLinkChecksCommand = "linkchecker.resetLinkChecks";
+  const resetLinkChecksHandler = () => {
+    //clear results
+    results.length = 0;
+    //clear diagnostics
+    diagnosticCollection.clear();
+    //clear documents
+    documents.clear();
+    if (
+      vscode.window.activeTextEditor &&
+      vscode.window.activeTextEditor.document.languageId === "markdown"
+    ) {
+      updateDiags(vscode.window.activeTextEditor.document, true);
+    }
+  };
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(resetLinkChecksCommand, resetLinkChecksHandler)
+  );
+
 }
 
 // This method is called when your extension is deactivated

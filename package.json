@@ -34,7 +34,11 @@
     "commands": [
       {
         "command": "linkchecker.recheckLinks",
-        "title": "Recheck Links"
+        "title": "LinkChecker: Recheck Links"
+      },
+      {
+        "command": "linkchecker.resetLinkChecks",
+        "title": "LinkChecker: Reset Link Check Status"
       }
     ]
   },
